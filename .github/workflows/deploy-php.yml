@@ -2,7 +2,7 @@ name: Deploy PHP
 
 on:
   workflow_call:
-    inputs:
+    secrets:
       APP_NAME:
         required: false
         type: string
@@ -23,12 +23,12 @@ on:
         type: string
 
 env:
-  APP_NAME: ${{inputs.APP_NAME}}
-  AWS_ACCESS_KEY_ID: ${{ inputs.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
-  OWNER_EMAIL: ${{ inputs.OWNER_EMAIL }}
-  EMAIL_USERNAME: ${{ inputs.EMAIL_USERNAME }}
-  EMAIL_PASSWORD: ${{ inputs.EMAIL_PASSWORD }}
+  APP_NAME: ${{secrets.APP_NAME}}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  OWNER_EMAIL: ${{ secrets.OWNER_EMAIL }}
+  EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
+  EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
   AWS_REGION: ap-northeast-1
   ECR_REPOSITORY: backend_php
   ECS_SERVICE: course-app
