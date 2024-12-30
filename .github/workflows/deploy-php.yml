@@ -27,7 +27,7 @@ env:
   ECR_REPOSITORY: backend_php
   ECS_SERVICE: course-app
   ECS_CLUSTER: web-support
-  ECS_DEF_NAME : task_def.json
+  ECS_DEF_NAME : task-def.json
   CONTAINER_NAME: course-app
 
 jobs:
@@ -93,13 +93,6 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f ./deploy/deploy_php/Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
-
-      - name: Move Task Def
-        run: |
-          ls -la
-          ls -la ./deploy/deploy_php/
-          ls -la ./deploy/deploy_php/${{ env.ECS_DEF_NAME }}
-          mv ./deploy/deploy_php/${{ env.ECS_DEF_NAME }} ./
 
       # 任务定义中使用最新的镜像ID 及 配置文件
       - name: Fill in the new image ID in the Amazon ECS task definition
