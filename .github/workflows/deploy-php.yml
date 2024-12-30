@@ -26,6 +26,14 @@ jobs:
     environment: production
 
     steps:
+      - name: Use ENV secret
+        run: |
+          echo "Using secret ENV from repo1: ${{ vars.TEST_V1 }}"
+
+      - name: print2
+        run: |
+          echo "Using secret ENV from repo1: ${{ secrets.AWS_REGION }}"
+
       # 检出代码
       - name: Checkout
         uses: actions/checkout@v4
