@@ -43,13 +43,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          repository: luzhengfei/devops
           path: ./deploy
 
       # 检出项目代码
       - name: Checkout project
         uses: actions/checkout@v4
         with:
-          repository: luzhengfei/laravel-backend-project
+          repository: luzhengfei/${{secrets.APP_NAME}}
           path: ./project_dir
 
       # 设置PHP版本
