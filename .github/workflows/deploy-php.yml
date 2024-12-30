@@ -94,17 +94,16 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-      - name: List Files v1
+      - name: Move Task Def
         run: |
-          ls -la
-          ls -la ./deploy
+          mv ./deploy/deploy_php/${{ env.ECS_DEF_NAME }} ./
 
       # 任务定义中使用最新的镜像ID 及 配置文件
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: deploy/deploy_php/${{ env.ECS_DEF_NAME }}
+          task-definition: ${{ env.ECS_DEF_NAME }}
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ steps.build-image.outputs.image }}
           # 环境变量文件存储在私有 S3 中
