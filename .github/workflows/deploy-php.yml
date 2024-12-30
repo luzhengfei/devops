@@ -96,6 +96,9 @@ jobs:
 
       - name: Move Task Def
         run: |
+          ls -la
+          ls -la ./deploy/deploy_php/
+          ls -la ./deploy/deploy_php/${{ env.ECS_DEF_NAME }}
           mv ./deploy/deploy_php/${{ env.ECS_DEF_NAME }} ./
 
       # 任务定义中使用最新的镜像ID 及 配置文件
