@@ -6,16 +6,35 @@ on:
       APP_NAME:
         required: false
         type: string
+      AWS_ACCESS_KEY_ID:
+        required: false
+        type: string
+      AWS_SECRET_ACCESS_KEY:
+        required: false
+        type: string
+      OWNER_EMAIL:
+        required: false
+        type: string
+      EMAIL_USERNAME:
+        required: false
+        type: string
+      EMAIL_PASSWORD:
+        required: false
+        type: string
 
 env:
   APP_NAME: ${{inputs.APP_NAME}}
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  AWS_REGION: ${{ secrets.AWS_REGION }}
-  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
-  ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
-  CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
+  AWS_ACCESS_KEY_ID: ${{ inputs.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
+  OWNER_EMAIL: ${{ inputs.OWNER_EMAIL }}
+  EMAIL_USERNAME: ${{ inputs.EMAIL_USERNAME }}
+  EMAIL_PASSWORD: ${{ inputs.EMAIL_PASSWORD }}
+  AWS_REGION: ap-northeast-1
+  ECR_REPOSITORY: backend_php
+  ECS_SERVICE: course-app
+  ECS_CLUSTER: web-support
+  ECS_DEF_NAME : task_def.json
+  CONTAINER_NAME: course-app
 
 jobs:
   deploy:
@@ -26,13 +45,6 @@ jobs:
     #environment: production
 
     steps:
-      - name: Use Repository Variable
-        run: echo "Repository Variable: ${{ vars.TEST_V1 }}"
-
-      - name: print2
-        run: |
-          echo "Using secret ENV from repo1: ${{ secrets.AWS_REGION }}"
-
       # 检出代码
       - name: Checkout
         uses: actions/checkout@v4
@@ -62,9 +74,9 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
       # 查询ECR信息
       - name: Login to Amazon ECR
@@ -90,7 +102,7 @@ jobs:
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: ./deploy_php/task_def.json
+          task-definition: ./deploy_php/${{ env.ECS_DEF_NAME }}
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ steps.build-image.outputs.image }}
           # 环境变量文件存储在私有 S3 中
@@ -114,11 +126,11 @@ jobs:
         with:
           server_address: smtp.gmail.com
           server_port: 465
-          username: ${{ secrets.EMAIL_USERNAME }}
-          password: ${{ secrets.EMAIL_PASSWORD }}
+          username: ${{ env.EMAIL_USERNAME }}
+          password: ${{ env.EMAIL_PASSWORD }}
 
           subject: 部署通知
           body: ${{ github.repository }} 的构建任务执行完成，部署状态：${{ job.status }}
 
-          to: 981864142@qq.com
+          to: ${{env.OWNER_EMAIL}}
           from: lzfcoder@gmail.com
