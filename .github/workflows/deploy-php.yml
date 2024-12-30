@@ -1,6 +1,15 @@
 name: Deploy PHP
 
 on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
   workflow_call:
     secrets:
       APP_NAME:
@@ -76,6 +85,9 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
+
+      - name: List Files
+        run: ls -la
 
       # 创建镜像
       - name: Build, tag, and push image to Amazon ECR
