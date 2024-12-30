@@ -28,7 +28,7 @@ RUN mkdir -p /var/log/php-fpm && mkdir -p /var/log/php
 WORKDIR /var/www/html
 
 # 复制 PHP 项目代码到容器中
-COPY ./project_dir/app ./app
+COPY ../../project_dir/app ./app
 
 # 复制 nginx, php, php-fpm 配置文件
 COPY ./deploy_php/nginx.conf /etc/nginx/nginx.conf
