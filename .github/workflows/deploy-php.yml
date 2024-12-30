@@ -1,15 +1,6 @@
 name: Deploy PHP
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-    types:
-      - closed
-
   workflow_call:
     secrets:
       APP_NAME:
