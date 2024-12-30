@@ -23,12 +23,11 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.repository != 'luzhengfei/devops' }}
     timeout-minutes: 10 # 设置作业的超时时间为 10 分钟
-    environment: production
+    #environment: production
 
     steps:
-      - name: Use ENV secret
-        run: |
-          echo "Using secret ENV from repo1: ${{ vars.TEST_V1 }}"
+      - name: Use Repository Variable
+        run: echo "Repository Variable: ${{ vars.TEST_V1 }}"
 
       - name: print2
         run: |
