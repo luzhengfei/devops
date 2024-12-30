@@ -1,0 +1,117 @@
+name: Deploy PHP
+
+on:
+  workflow_call:
+    secrets:
+      REPO2_SECRET:
+        required: false
+
+env:
+  APP_NAME: laravel-backend-project
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
+  ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
+  ECS_TASK_DEFINITION: ${{ secrets.ECS_TASK_DEFINITION }}
+  CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    if: ${{ github.repository != 'luzhengfei/devops' }}
+    timeout-minutes: 10 # 设置作业的超时时间为 10 分钟
+    environment: production
+
+    steps:
+      # 检出代码
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 检出项目代码
+      - name: Checkout project
+        uses: actions/checkout@v4
+        with:
+          repository: luzhengfei/laravel-backend-project
+          path: ./project_dir
+
+      # 设置PHP版本
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+
+      # composer 安装依赖
+      - name: Install dependencies
+        uses: "ramsey/composer-install@v3"
+        with:
+          working-directory: "app"
+          composer-options: "--ignore-platform-reqs --optimize-autoloader"
+          custom-cache-key: "deploy-cache-key-v1"
+
+      # AWS身份认证
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # 查询ECR信息
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      # 创建镜像
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # Build a docker container and
+          # push it to ECR so that it can
+          # be deployed to ECS.
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      # 任务定义中使用最新的镜像ID 及 配置文件
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
+          # 环境变量文件存储在私有 S3 中
+          env-files: |
+            arn:aws:s3:::backend-env-v001/${{ env.APP_NAME }}.env
+
+      # 部署
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          #task-definition: arn:aws:ecs:${{ env.AWS_REGION }}:<aws_account_id>:task-definition/<task_definition_name>:<revision_number>
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+      # 发送邮件通知
+      - name: Notify Deploy Msg
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+
+          subject: 部署通知
+          body: ${{ github.repository }} 的构建任务执行完成，部署状态：${{ job.status }}
+
+          to: ${{ secrets.TO_EMAIL_USERS }}
+          from: ${{ secrets.FROM_EMAIL_USERS }}
