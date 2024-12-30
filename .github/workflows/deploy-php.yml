@@ -2,12 +2,13 @@ name: Deploy PHP
 
 on:
   workflow_call:
-    secrets:
-      REPO2_SECRET:
+    inputs:
+      APP_NAME:
         required: false
+        type: string
 
 env:
-  APP_NAME: laravel-backend-project
+  APP_NAME: ${{inputs.APP_NAME}}
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_REGION: ${{ secrets.AWS_REGION }}
