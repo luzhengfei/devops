@@ -1,0 +1,15 @@
+name: Deploy PHP Action
+description: PHP environment deploys common logic
+inputs:
+  APP_NAME:
+    description: The application name
+    required: true
+    default: "APP"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Print message
+      run: echo "${{ inputs.APP_NAME }}"
+    - name: Print SC
+      run: echo "${{ secrets.DEVOPS_ENV }}"
