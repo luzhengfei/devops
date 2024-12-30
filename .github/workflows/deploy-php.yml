@@ -42,6 +42,11 @@ jobs:
       # 检出代码
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          path: ./deploy
+
+      - name: List Files
+        run: ls -la
 
       # 检出项目代码
       - name: Checkout project
