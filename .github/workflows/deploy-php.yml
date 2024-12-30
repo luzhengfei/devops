@@ -104,7 +104,7 @@ jobs:
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: ${{ env.ECS_DEF_NAME }}
+          task-definition: ./deploy/deploy_php/${{ env.ECS_DEF_NAME }}
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ steps.build-image.outputs.image }}
           # 环境变量文件存储在私有 S3 中
