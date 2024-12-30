@@ -80,7 +80,9 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: List Files
-        run: ls -la
+        run: | 
+          ls -la
+          ls -la ./deploy
 
       # 创建镜像
       - name: Build, tag, and push image to Amazon ECR
