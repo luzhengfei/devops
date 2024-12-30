@@ -14,7 +14,6 @@ env:
   ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
   ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
   ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
-  ECS_TASK_DEFINITION: ${{ secrets.ECS_TASK_DEFINITION }}
   CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
 
 jobs:
@@ -83,7 +82,7 @@ jobs:
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          task-definition: ./deploy_php/task_def.json
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ steps.build-image.outputs.image }}
           # 环境变量文件存储在私有 S3 中
@@ -113,5 +112,5 @@ jobs:
           subject: 部署通知
           body: ${{ github.repository }} 的构建任务执行完成，部署状态：${{ job.status }}
 
-          to: ${{ secrets.TO_EMAIL_USERS }}
-          from: ${{ secrets.FROM_EMAIL_USERS }}
+          to: 981864142@qq.com
+          from: lzfcoder@gmail.com
