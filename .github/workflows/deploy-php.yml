@@ -47,7 +47,7 @@ jobs:
       - name: Install dependencies
         uses: "ramsey/composer-install@v3"
         with:
-          working-directory: "app"
+          working-directory: "./project_dir/app"
           composer-options: "--ignore-platform-reqs --optimize-autoloader"
           custom-cache-key: "deploy-cache-key-v1"
 
