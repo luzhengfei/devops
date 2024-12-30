@@ -36,7 +36,7 @@ COPY ./deploy/deploy_php/docker-fpm.ini /usr/local/etc/php/conf.d/docker-fpm.ini
 COPY ./deploy/deploy_php/zz-docker.conf /usr/local/etc/php-fpm.d/zz-docker.conf
 
 # 复制启动脚本
-COPY ./deploy_php/start.sh /start.sh
+COPY ./deploy/deploy_php/start.sh /start.sh
 RUN chmod +x /start.sh
 
 # 设置权限
